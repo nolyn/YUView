@@ -26,11 +26,14 @@ jobs:
 ############################### Required packages from distributors ######################
 ##########################################################################################
 
-    - name: Install Linux packages
+    - name: Install and remove Linux packages
       run: |
         sudo apt-get update
         sudo apt-get install libgl1-mesa-dev libxkbcommon-x11-0 libpcre2-16-0 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libatspi2.0-dev
+        # remove installed qt versions if any. they can interfere with the packaging tools
+        sudo apt-get autoremove '.*qt.*'
       if: matrix.os == 'ubuntu-16.04' || matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
+      shell: bash
 
     - name: Install Newer GCC Ubuntu 16.04
       run: |
@@ -40,6 +43,7 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
         sudo update-alternatives --config gcc
       if: matrix.os == 'ubuntu-16.04'
+      shell: bash
 
 ##########################################################################################
 ############################### Packages build by us: Qt, libde265  ######################
@@ -54,15 +58,6 @@ jobs:
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/${{matrix.QT_FILE}} -o Qt.zip
         unzip -qa Qt.zip
       shell: bash
-
-    - name: Install Linuxdeployqt
-      run: |
-        pwd
-        cd $HOME
-        wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-        wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-        chmod +x linuxdeploy*.AppImage
-      if: matrix.os == 'ubuntu-16.04'
 
     - name: Install libde265
       run: |
@@ -83,6 +78,7 @@ jobs:
         cd build
         cmake  -DCMAKE_PREFIX_PATH="$HOME/YUViewQt/Qt" -DCMAKE_INSTALL_PREFIX=/usr ..
         cmake --build . --parallel $(nproc)
+      shell: bash
 
 ##########################################################################################
 ############################### Unit tests ###############################################
@@ -93,6 +89,7 @@ jobs:
         cd $GITHUB_WORKSPACE/build
         ctest --output-on-failure
         # ctest --output-on-failure --debug --extra-verbose
+      shell: bash
 
 ##########################################################################################
 ############################### Packaging YUView, Installers #############################
@@ -111,11 +108,12 @@ jobs:
 
     - name: Build Appimage (Linux)
       run: |
+        cd $HOME
+        curl -L https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -o linuxdeployqt-6-x86_64.AppImage
+        chmod a+x linuxdeployqt-6-x86_64.AppImage
         cd $GITHUB_WORKSPACE/build
         make install DESTDIR=appdir
-        which qmake
-        QMAKE="$HOME/YUViewQt/Qt/bin/qmake"
-        $HOME/linuxdeploy-x86_64.AppImage  --appdir appdir --plugin qt  --output appimage
+        $HOME/linuxdeployqt-6-x86_64.AppImage appdir/usr/share/applications/de.rwth_aachen.ient.YUView.desktop -appimage -qmake=/home/ubuntu/YUViewQt/Qt/bin/qmake -bundle-non-qt-libs -verbose=2
         mv YUView-*.AppImage YUView.AppImage
         mkdir $GITHUB_WORKSPACE/artifacts
         cp YUView.AppImage $GITHUB_WORKSPACE/artifacts/
@@ -124,6 +122,7 @@ jobs:
         cd $GITHUB_WORKSPACE/artifacts
         ls -l
       if: matrix.os == 'ubuntu-16.04'
+      shell: bash
 
 ##########################################################################################
 ############################### Upload ###################################################
