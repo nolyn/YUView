@@ -112,7 +112,7 @@ jobs:
         curl -L https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -o linuxdeployqt-6-x86_64.AppImage
         chmod a+x linuxdeployqt-6-x86_64.AppImage
         cd $GITHUB_WORKSPACE/build
-        make install DESTDIR=appdir
+        make install DESTDIR=appdir      
         $HOME/linuxdeployqt-6-x86_64.AppImage appdir/usr/share/applications/de.rwth_aachen.ient.YUView.desktop -appimage -qmake=/home/ubuntu/YUViewQt/Qt/bin/qmake -bundle-non-qt-libs -verbose=2
         mv YUView-*.AppImage YUView.AppImage
         mkdir $GITHUB_WORKSPACE/artifacts
