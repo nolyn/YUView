@@ -44,7 +44,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set_source_files_properties(${app_icon_macos} PROPERTIES
            MACOSX_PACKAGE_LOCATION "Resources")
 
-    qt_add_executable(  YUView  MACOSX_BUNDLE ${APP_SRC_FILES}  ${APP_INC_FILES}  )
+    add_executable( YUView  MACOSX_BUNDLE ${APP_SRC_FILES}  ${APP_INC_FILES}  ${app_icon_macos})
     target_link_libraries( YUView
         YUViewLib
         Qt::Gui
@@ -62,7 +62,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    add_executable( YUView  MACOSX_BUNDLE ${APP_SRC_FILES}  ${APP_INC_FILES}  )
+    add_executable( YUView  ${APP_SRC_FILES}  ${APP_INC_FILES}  )
     target_link_libraries( YUView
         YUViewLib
         Qt::Gui
@@ -101,7 +101,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    add_executable( YUView  MACOSX_BUNDLE ${APP_SRC_FILES}  ${APP_INC_FILES}  )
+    add_executable( YUView  ${APP_SRC_FILES}  ${APP_INC_FILES}  )
     target_link_libraries( YUView
         YUViewLib
         Qt::Gui
