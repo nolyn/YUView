@@ -58,7 +58,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         "YUViewApp/src"
     )
 
-    install(TARGETS YUView)
+    install(TARGETS YUView
+        BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
