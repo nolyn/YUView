@@ -40,7 +40,6 @@ jobs:
         cd $HOME
         curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/${{matrix.LIBDE265_REMOTE}} -o ${{matrix.LIBDE265_LOCAL}}
         curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
-        find .
       shell: bash
 
 ##########################################################################################
@@ -49,14 +48,12 @@ jobs:
 
     - name: Build Linux/Mac
       run: |
-        pwd
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
         cmake  -DCMAKE_PREFIX_PATH="$HOME/YUViewQt/Qt" -DCMAKE_INSTALL_PREFIX=/usr ..
         cmake --build . --parallel $(nproc)
         # list files for debug
-        find .
       shell: bash
 
 ##########################################################################################
