@@ -40,6 +40,7 @@ jobs:
         cd $HOME
         curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/${{matrix.LIBDE265_REMOTE}} -o ${{matrix.LIBDE265_LOCAL}}
         curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
+        find .
       shell: bash
 
 ##########################################################################################
@@ -82,7 +83,7 @@ jobs:
         strip Qt/bin/macdeployqt
         cd $GITHUB_WORKSPACE
         $HOME/YUViewQt/Qt/bin/macdeployqt build/YUView.app -always-overwrite -verbose=2
-        cp ${{matrix.LIBDE265_LOCAL}} build/YUView.app/Contents/MacOS/.
+        cp $HOME/${{matrix.LIBDE265_LOCAL}} build/YUView.app/Contents/MacOS/.
         cd build
         # Zip
         zip -r ${{matrix.ARTIFACT_NAME}} YUView.app/
