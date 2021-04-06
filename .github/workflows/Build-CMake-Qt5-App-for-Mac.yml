@@ -1,4 +1,4 @@
-name: CI build AppImage with CMake and Qt5
+name: CI build App for Mac with CMake and Qt5
 
 on:
   push:
@@ -28,9 +28,7 @@ jobs:
 
     - name: Install Qt base
       run: |
-        pwd
         cd $HOME
-        pwd
         mkdir -p YUViewQt
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/${{matrix.QT_FILE}} -o Qt.zip
@@ -56,6 +54,8 @@ jobs:
         cd build
         cmake  -DCMAKE_PREFIX_PATH="$HOME/YUViewQt/Qt" -DCMAKE_INSTALL_PREFIX=/usr ..
         cmake --build . --parallel $(nproc)
+        # list files for debug
+        find .
       shell: bash
 
 ##########################################################################################
@@ -75,7 +75,12 @@ jobs:
 
     - name: Build App (Mac)
       run: |
-        macdeployqt build/YUViewApp/YUView.app -always-overwrite -verbose=2
+        cd $HOME/YUViewQt
+        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_mac.zip -o deployQt.zip
+        unzip -qa deployQt.zip
+        cp Qttools/bin/macdeployqt Qt/bin/macdeployqt
+        strip Qt/bin/macdeployqt
+        $HOME/YUViewQt/Qt/bin/macdeployqt build/YUViewApp/YUView.app -always-overwrite -verbose=2
         cp ${{matrix.LIBDE265_LOCAL}} build/YUViewApp/YUView.app/Contents/MacOS/.
         cd build/YUViewApp
         # Zip
