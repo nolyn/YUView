@@ -115,7 +115,7 @@ jobs:
         python deployment/versioning.py -d deploy -o deploy/versioninfo.txt
         mkdir artifacts
         7z a artifacts/YUView-Win.zip ./deploy/*
-      shell: cmd
+      shell: bash
     - name: Wix Windows
       run: |
         cd $GITHUB_WORKSPACE/deployment/wix
