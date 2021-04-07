@@ -34,6 +34,8 @@ jobs:
         cd openSSL
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/openSSL1.1.1g/openSSL_1_1_1g_win.zip -o openSSL.zip
         7z x openSSL.zip
+        OPENSSL_DIR=$(pwd)
+        echo $OPENSSL_DIR
         cd ..
       shell: bash
 
@@ -113,7 +115,9 @@ jobs:
         qmake -help
         $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
-        cp $USERPROFILE/openSSL/*.dll .
+        
+        echo $OPENSSL_DIR
+        cp $OPENSSL_DIR/*.dll .
         mkdir decoder
         cp $USERPROFILE/libde265.dll decoder
         cp $USERPROFILE/libde265License.txt decoder
