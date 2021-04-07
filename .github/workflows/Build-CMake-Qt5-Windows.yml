@@ -57,7 +57,6 @@ jobs:
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
         7z x  Qt.zip
-        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
       shell: bash
     - name: Install Qt deploy tools
       run: |
@@ -84,8 +83,6 @@ jobs:
 
     - name: Build
       run: |
-        echo $PATH
-        echo $HOME
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
@@ -111,31 +108,13 @@ jobs:
 
     - name: WindeployQT
       run: |
-        echo $PATH
-        echo $HOME
-        
-        cd $USERPROFILE
-        export HOME=$(pwd)
-        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
-
-        echo $PATH
-        echo $HOME
-
-        cd  $HOME/YUViewQt/Qt/bin
-
         cd $GITHUB_WORKSPACE
         mkdir deploy
         cd deploy
-        cp ../build/Release/YUView.exe .
-        qmake -help
-        ls -l $HOME/YUViewQt/Qttools/bin/windeployqt.exe 
-        ls -l YUView.exe
-        ls -l $GITHUB_WORKSPACE/deploy 
-        echo "calling windeploy"
-        echo "$HOME/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe"
+        cp ../build/Release/YUView.exe .        
+        # PATH seems to be reset in every step (in contrast to HOME). have to modify it here
+        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"        
         $HOME/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
-        #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
-        echo "cp $HOME/openSSL/*.dll ."
         cp $HOME/openSSL/*.dll .
         mkdir decoder
         cp $HOME/libde265.dll decoder
