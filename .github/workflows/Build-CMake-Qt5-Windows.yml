@@ -104,7 +104,7 @@ jobs:
         mkdir deploy
         cd deploy
         cp ../build/Release/YUView.exe .
-        $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
+        PATH="$USERPROFILE/YUViewQt/Qt/bin:$PATH" $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
         cp $USERPROFILE/openSSL/*.dll .
         mkdir decoder
