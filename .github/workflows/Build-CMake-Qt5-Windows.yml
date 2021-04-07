@@ -26,9 +26,15 @@ jobs:
 ##########################################################################################
 ############################### Required packages from distributors ######################
 ##########################################################################################
-
+    - name: Test
+      run: |
+        cd $USERPROFILE
+        export HOME=$(pwd)
+      shell: bash
+            
     - name: Install openSSL
       run: |
+        echo $HOME
         cd $USERPROFILE
         mkdir openSSL
         cd openSSL
