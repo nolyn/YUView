@@ -12,17 +12,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019]
-        qt_version: [Qt5, Qt6]
         include:
           - os: windows-2019
+            qt_version: Qt5
             auto_update: true
             ARTIFACT_NAME: YUView-Win.zip
           - os: windows-2019
+            qt_version: Qt5
             auto_update: false
             ARTIFACT_NAME: YUView-Win-noautoupdate.zip
-          - qt_version: Qt5
-          - qt_version: Qt6
+          - os: windows-2019
+            qt_version: Qt6
+            auto_update: true
+          - os: windows-2019
+            qt_version: Qt6
+            auto_update: false
     steps:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow
