@@ -28,6 +28,7 @@ jobs:
 ##########################################################################################
     - name: Setup environment
       run: |
+        # converts the home path containing "\" to regular path with "/"
         cd $USERPROFILE
         export HOME=$(pwd)
       shell: bash
@@ -57,7 +58,6 @@ jobs:
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
         7z x  Qt.zip
         export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
-        qmake -help
       shell: bash
     - name: Install Qt deploy tools
       run: |
@@ -109,25 +109,21 @@ jobs:
 
     - name: WindeployQT
       run: |
-        # store path to qt bin dir. A work around for \ escape problem
-        cd  $USERPROFILE/YUViewQt/Qt/bin
-        QT_BIN_PATH=$(pwd)
-        echo $QT_BIN_PATH
+        cd  $HOME/YUViewQt/Qt/bin
+
         cd $GITHUB_WORKSPACE
         mkdir deploy
         cd deploy
         cp ../build/Release/YUView.exe .
-        find $USERPROFILE/YUViewQt/Qt
-        export PATH="$QT_BIN_PATH:$PATH"
-        echo $PATH
-        qmake -help
-        $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
+        find $HOME/YUViewQt/Qt
+
+        $HOME/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
 
         cp $HOME/openSSL/*.dll .
         mkdir decoder
-        cp $USERPROFILE/libde265.dll decoder
-        cp $USERPROFILE/libde265License.txt decoder
+        cp $HOME/libde265.dll decoder
+        cp $HOME/libde265License.txt decoder
         cp ../LICENSE.GPL3 .
         cd ..
         python deployment/versioning.py -d deploy -o deploy/versioninfo.txt
