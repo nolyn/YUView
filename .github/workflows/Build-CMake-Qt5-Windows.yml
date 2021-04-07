@@ -17,23 +17,27 @@ jobs:
             qt_version: Qt5
             qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip
             qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip
+            qt_tools_path: Qttools/bin/windeployqt.exe
             auto_update: true
             ARTIFACT_NAME: YUView-Win.zip
           - os: windows-2019
             qt_version: Qt5
             qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip
             qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip
+            qt_tools_path: Qttools/bin/windeployqt.exe
             auto_update: false
             ARTIFACT_NAME: YUView-Win-noautoupdate.zip
           - os: windows-2019
             qt_version: Qt6
             qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_win.zip
             qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip
+            qt_tools_path: build/bin/windeployqt.exe
             auto_update: true
           - os: windows-2019
             qt_version: Qt6
             qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_win.zip
             qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip
+            qt_tools_path: build/bin/windeployqt.exe
             auto_update: false
     steps:
     - uses: actions/checkout@v2
@@ -132,7 +136,7 @@ jobs:
         cp ../build/Release/YUView.exe .
         # PATH seems to be reset in every step (in contrast to HOME). have to modify it here
         export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
-        $HOME/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
+        $HOME/YUViewQt/${{matrix.qt_tools_path}} --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         cp $HOME/openSSL/*.dll .
         mkdir decoder
         cp $HOME/libde265.dll decoder
