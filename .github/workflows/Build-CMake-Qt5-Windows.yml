@@ -1,0 +1,125 @@
+name: CI build with CMake and Qt5 on Windows
+
+on:
+  push:
+  release:
+    types:
+      - created
+
+jobs:
+
+  build-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+            auto_update: true
+            ARTIFACT_NAME: YUView-Win.zip
+          - os: windows-2019
+            auto_update: false
+            ARTIFACT_NAME: YUView-Win-noautoupdate.zip
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
+
+##########################################################################################
+############################### Required packages from distributors ######################
+##########################################################################################
+
+    - name: Install jom
+      run: |
+        pwd
+        echo $HOMEPATH
+        echo $GITHUB_WORKSPACE
+        cd $HOMEPATH
+        curl -L https://github.com/ChristianFeldmann/jom/releases/download/v1.1.3-build/jom.exe -o jom.exe
+      shell: bash
+    - name: Install openSSL
+      run: |
+        cd $HOMEPATH
+        mkdir openSSL1
+        cd openSSL
+        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/openSSL1.1.1g/openSSL_1_1_1g_win.zip -o openSSL.zip
+        7z x openSSL.zip
+        cd ..
+      shell: bash
+
+##########################################################################################
+############################### Packages build by us: Qt, libde265  ######################
+##########################################################################################
+
+    - name: Install Qt base
+      run: |
+        cd $HOMEPATH
+        mkdir -p YUViewQt/
+        cd YUViewQt
+        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
+        7z x  Qt.zip
+      shell: bash
+    - name: Install Qt deploy tools
+      run: |
+        cd $HOMEPATH
+        cd YUViewQt
+        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip -o deployQt.zip
+        7z x deployQt.zip
+      shell: bash
+    - name: Install libde265
+      run: |
+        cd $HOMEPATH
+        curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/libde265.dll -o libde265.dll
+        curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
+      shell: bash
+
+##########################################################################################
+############################### Build YUView #############################################
+##########################################################################################
+
+    - name: Activate auto update
+      run: sed -i -- "s/#define UPDATE_FEATURE_ENABLE 0/#define UPDATE_FEATURE_ENABLE 1/g" YUViewLib/src/common/typedef.h
+      shell: bash
+      if: matrix.auto_update == true
+
+    - name: Build Linux/Mac
+      run: |
+        cd $GITHUB_WORKSPACE
+        mkdir build
+        cd build
+        cmake  -DCMAKE_PREFIX_PATH="$HOMEPATH/YUViewQt/Qt" ..
+        cmake --build . --parallel $(nproc)
+      shell: bash
+
+##########################################################################################
+############################### Unit tests ###############################################
+##########################################################################################
+
+    - name: Run unit tests
+      run: |
+        cd $GITHUB_WORKSPACE/build
+        ctest --output-on-failure
+        # ctest --output-on-failure --debug --extra-verbose
+
+##########################################################################################
+############################### Packaging YUView, Installers #############################
+##########################################################################################
+
+    # - name: Build App (Mac)
+    #   run: |
+    #     macdeployqt build/YUViewApp/YUView.app -always-overwrite -verbose=2
+    #     cp ${{matrix.LIBDE265_LOCAL}} build/YUViewApp/YUView.app/Contents/MacOS/.
+    #     cd build/YUViewApp
+    #     # Zip
+    #     zip -r ${{matrix.ARTIFACT_NAME}} YUView.app/
+    #     mkdir $GITHUB_WORKSPACE/artifacts
+    #     cp ${{matrix.ARTIFACT_NAME}} $GITHUB_WORKSPACE/artifacts/
+    #   if: matrix.os == 'macos-10.15' || matrix.os == 'macos-11.0'
+
+##########################################################################################
+############################### Upload ###################################################
+##########################################################################################
+
+
+  # How to upload files to the release:
+  # https://github.com/Blacksmoke16/oq/pull/47/files#diff-082c28d748ad2e3eecc5508d740d9417R9-R29
+  # Mime type list
+  # https://www.iana.org/assignments/media-types/media-types.xhtml
