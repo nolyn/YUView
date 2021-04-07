@@ -33,7 +33,7 @@ jobs:
 ##########################################################################################
 
     - name: Install Qt base
-      run: |
+      run: |      
         cd $HOME
         mkdir -p YUViewQt
         cd YUViewQt
@@ -87,6 +87,7 @@ jobs:
 ##########################################################################################
 
     - name: Build App (Mac)
+      if: matrix.qt_version == 'Qt5' 
       run: |
         cd $GITHUB_WORKSPACE
         $HOME/YUViewQt/Qt/bin/macdeployqt build/YUView.app -always-overwrite -verbose=2
