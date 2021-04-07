@@ -86,7 +86,7 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
-        cmake  -DCMAKE_PREFIX_PATH="$USERPROFILE/YUViewQt/Qt" ..
+        cmake  -DCMAKE_PREFIX_PATH="$USERPROFILE/YUViewQt/Qt" -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . --parallel $(nproc) --verbose
       shell: bash
 
