@@ -84,6 +84,8 @@ jobs:
 
     - name: Build
       run: |
+        echo $PATH
+        echo $HOME
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
@@ -109,6 +111,16 @@ jobs:
 
     - name: WindeployQT
       run: |
+        echo $PATH
+        echo $HOME
+        
+        cd $USERPROFILE
+        export HOME=$(pwd)
+        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
+
+        echo $PATH
+        echo $HOME
+
         cd  $HOME/YUViewQt/Qt/bin
 
         cd $GITHUB_WORKSPACE
