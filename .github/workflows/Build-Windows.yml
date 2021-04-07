@@ -1,4 +1,4 @@
-name: CI build with CMake and Qt5 on Windows
+name: CI build Windows
 
 on:
   push:

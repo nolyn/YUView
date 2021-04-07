@@ -1,4 +1,4 @@
-name: CI build App for Mac with CMake and Qt5
+name: CI build Mac
 
 on:
   push:
@@ -15,9 +15,17 @@ jobs:
         include:
           - os: macos-10.15
             QT_FILE: qtBase_5.15.1_mac.zip
-            LIBDE265_REMOTE: libde265.dylib
-            LIBDE265_LOCAL: libde265-internals.dylib
+            qt_version: Qt5
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_mac.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_mac.zip
+            qt_tools_path: Qttools/bin/macdeployqt
             ARTIFACT_NAME: YUView-Mac.zip
+          - os: macos-10.15
+            qt_version: Qt6
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_mac.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_mac.zip
+            qt_tools_path: build/bin/macdeployqt
+            QT_FILE: qtBase_6.0.2_mac.zip
     steps:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow
@@ -31,14 +39,24 @@ jobs:
         cd $HOME
         mkdir -p YUViewQt
         cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/${{matrix.QT_FILE}} -o Qt.zip
+        curl -L ${{matrix.qt_base_link}} -o Qt.zip
         unzip -qa Qt.zip
       shell: bash
+
+    - name: Install Qt deploy tools
+      shell: bash
+      run: |
+        cd $HOME
+        cd YUViewQt
+        curl -L ${{matrix.qt_tools_link}} -o deployQt.zip
+        7z x deployQt.zip
+        cp  ${{matrix.qt_tools_path}} Qt/bin/macdeployqt
+        strip Qt/bin/macdeployqt
 
     - name: Install libde265
       run: |
         cd $HOME
-        curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/${{matrix.LIBDE265_REMOTE}} -o ${{matrix.LIBDE265_LOCAL}}
+        curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/libde265.dylib -o libde265-internals.dylib
         curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
       shell: bash
 
@@ -46,14 +64,13 @@ jobs:
 ############################### Build YUView #############################################
 ##########################################################################################
 
-    - name: Build Linux/Mac
+    - name: Build
       run: |
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
         cmake  -DCMAKE_PREFIX_PATH="$HOME/YUViewQt/Qt" -DCMAKE_INSTALL_PREFIX=/usr ..
         cmake --build . --parallel $(nproc)
-        # list files for debug
       shell: bash
 
 ##########################################################################################
@@ -73,26 +90,21 @@ jobs:
 
     - name: Build App (Mac)
       run: |
-        cd $HOME/YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_mac.zip -o deployQt.zip
-        unzip -qa deployQt.zip
-        cp Qttools/bin/macdeployqt Qt/bin/macdeployqt
-        strip Qt/bin/macdeployqt
         cd $GITHUB_WORKSPACE
         $HOME/YUViewQt/Qt/bin/macdeployqt build/YUView.app -always-overwrite -verbose=2
-        cp $HOME/${{matrix.LIBDE265_LOCAL}} build/YUView.app/Contents/MacOS/.
+        cp $HOME/libde265-internals.dylib build/YUView.app/Contents/MacOS/.
         cd build
         # Zip
         zip -r ${{matrix.ARTIFACT_NAME}} YUView.app/
         mkdir $GITHUB_WORKSPACE/artifacts
         cp ${{matrix.ARTIFACT_NAME}} $GITHUB_WORKSPACE/artifacts/
-      if: matrix.os == 'macos-10.15' || matrix.os == 'macos-11.0'
 
 ##########################################################################################
 ############################### Upload ###################################################
 ##########################################################################################
 
     - name: Upload Release
+      if: matrix.qt_version == 'Qt5' && github.event_name == 'release' && matrix.os == 'macos-10.15'
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -101,7 +113,6 @@ jobs:
         asset_path: artifacts/${{matrix.ARTIFACT_NAME}}
         asset_name: ${{matrix.ARTIFACT_NAME}}
         asset_content_type: application/zip
-      if: github.event_name == 'release' && matrix.os == 'macos-10.15'
 
   # How to upload files to the release:
   # https://github.com/Blacksmoke16/oq/pull/47/files#diff-082c28d748ad2e3eecc5508d740d9417R9-R29
