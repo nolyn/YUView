@@ -14,9 +14,11 @@ jobs:
       matrix:
         include:
           - os: windows-2019
+            qt_version: [Qt5]
             auto_update: true
             ARTIFACT_NAME: YUView-Win.zip
           - os: windows-2019
+            qt_version: [Qt5]
             auto_update: false
             ARTIFACT_NAME: YUView-Win-noautoupdate.zip
     steps:
@@ -55,7 +57,8 @@ jobs:
         cd $HOME
         mkdir -p YUViewQt/
         cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
+        QT_LINK=${{ fromJson('{ Qt5: "https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip", Qt6: "https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip" }')[qt_version] }}
+        curl -L ${QT_LINK} -o Qt.zip
         7z x  Qt.zip
       shell: bash
     - name: Install Qt deploy tools
@@ -111,9 +114,9 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir deploy
         cd deploy
-        cp ../build/Release/YUView.exe .        
+        cp ../build/Release/YUView.exe .
         # PATH seems to be reset in every step (in contrast to HOME). have to modify it here
-        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"        
+        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
         $HOME/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         cp $HOME/openSSL/*.dll .
         mkdir decoder
