@@ -24,25 +24,25 @@ jobs:
     - run: git fetch --prune --unshallow
 
 ##########################################################################################
-############################### Required packages from distributors ######################
+############################### Setup environment ########################################
 ##########################################################################################
-    - name: Test
+    - name: Setup environment
       run: |
         cd $USERPROFILE
         export HOME=$(pwd)
       shell: bash
-            
+
+##########################################################################################
+############################### Required packages from distributors ######################
+##########################################################################################
+
     - name: Install openSSL
       run: |
-        echo $HOME
-        cd $USERPROFILE
+        cd $HOME
         mkdir openSSL
         cd openSSL
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/openSSL1.1.1g/openSSL_1_1_1g_win.zip -o openSSL.zip
         7z x openSSL.zip
-        OPENSSL_DIR=$(pwd)
-        echo $OPENSSL_DIR
-        cd ..
       shell: bash
 
 ##########################################################################################
@@ -51,22 +51,24 @@ jobs:
 
     - name: Install Qt base
       run: |
-        cd $USERPROFILE
+        cd $HOME
         mkdir -p YUViewQt/
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
         7z x  Qt.zip
+        export PATH="$HOME/YUViewQt/Qt/bin:$PATH"
+        qmake -help
       shell: bash
     - name: Install Qt deploy tools
       run: |
-        cd $USERPROFILE
+        cd $HOME
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip -o deployQt.zip
         7z x deployQt.zip
       shell: bash
     - name: Install libde265
       run: |
-        cd $USERPROFILE
+        cd $HOME
         curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/libde265.dll -o libde265.dll
         curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
       shell: bash
@@ -85,7 +87,7 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
-        cmake  -DCMAKE_PREFIX_PATH="$USERPROFILE/YUViewQt/Qt"  ..
+        cmake  -DCMAKE_PREFIX_PATH="$HOME/YUViewQt/Qt"  ..
         cmake --build . --parallel $(nproc) --config Release --verbose
       shell: bash
 
@@ -114,16 +116,15 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir deploy
         cd deploy
-        cp ../build/Release/YUView.exe .      
+        cp ../build/Release/YUView.exe .
         find $USERPROFILE/YUViewQt/Qt
         export PATH="$QT_BIN_PATH:$PATH"
         echo $PATH
         qmake -help
         $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
         #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
-        
-        echo $OPENSSL_DIR
-        cp $OPENSSL_DIR/*.dll .
+
+        cp $HOME/openSSL/*.dll .
         mkdir decoder
         cp $USERPROFILE/libde265.dll decoder
         cp $USERPROFILE/libde265License.txt decoder
