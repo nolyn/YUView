@@ -96,6 +96,8 @@ jobs:
 
     - name: Run unit tests
       run: |
+        cd $GITHUB_WORKSPACE
+        find .
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/build
         ctest --output-on-failure --build-config Release
