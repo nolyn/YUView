@@ -36,6 +36,9 @@ jobs:
 
     - name: Install Qt base
       run: |
+        echo "Environment:"
+        env
+        
         cd $HOME
         mkdir -p YUViewQt
         cd YUViewQt
@@ -90,6 +93,9 @@ jobs:
 
     - name: Build App (Mac)
       run: |
+        echo "Environment:"
+        env
+        
         cd $GITHUB_WORKSPACE
         $HOME/YUViewQt/Qt/bin/macdeployqt build/YUView.app -always-overwrite -verbose=2
         cp $HOME/libde265-internals.dylib build/YUView.app/Contents/MacOS/.
