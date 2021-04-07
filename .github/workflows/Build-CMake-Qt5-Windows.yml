@@ -99,14 +99,16 @@ jobs:
 
     - name: WindeployQT
       run: |
+        # store path to qt bin dir. A work around for \ escape problem
+        cd  $USERPROFILE/YUViewQt/Qt/bin
+        QT_BIN_PATH=$(pwd)
+        echo $QT_BIN_PATH
         cd $GITHUB_WORKSPACE
-        find $USERPROFILE/openSSL
         mkdir deploy
         cd deploy
-        cp ../build/Release/YUView.exe .
-        echo $PATH
+        cp ../build/Release/YUView.exe .      
         find $USERPROFILE/YUViewQt/Qt
-        export PATH="$USERPROFILE/YUViewQt/Qt/bin:$PATH"
+        export PATH="$QT_BIN_PATH:$PATH"
         echo $PATH
         qmake -help
         $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
