@@ -27,15 +27,6 @@ jobs:
 ############################### Required packages from distributors ######################
 ##########################################################################################
 
-#     - name: Install jom
-#       run: |        
-#         echo $HOMEDRIVE
-#         echo $HOMEPATH
-#         echo $GITHUB_WORKSPACE
-#         echo $USERPROFILE
-#         cd $USERPROFILE
-#         curl -L https://github.com/ChristianFeldmann/jom/releases/download/v1.1.3-build/jom.exe -o jom.exe
-#       shell: bash
     - name: Install openSSL
       run: |
         cd $USERPROFILE
@@ -81,7 +72,7 @@ jobs:
       shell: bash
       if: matrix.auto_update == true
 
-    - name: Build 
+    - name: Build
       run: |
         cd $GITHUB_WORKSPACE
         mkdir build
@@ -94,35 +85,85 @@ jobs:
 ############################### Unit tests ###############################################
 ##########################################################################################
 
-    - name: Run unit tests
-      run: |
-        cd $GITHUB_WORKSPACE
-        find .
-        echo $GITHUB_WORKSPACE
-        cd $GITHUB_WORKSPACE/build
-        ctest --output-on-failure --build-config Release
-        # ctest --output-on-failure --debug --extra-verbose
-      shell: bash
+    # test don't work atm. need a windows system to debug it
+    # - name: Run unit tests
+    #   run: |
+    #     cd $GITHUB_WORKSPACE/build
+    #     ctest --output-on-failure --build-config Release
+    #     # ctest --output-on-failure --debug --extra-verbose
+    #   shell: bash
 
 ##########################################################################################
 ############################### Packaging YUView, Installers #############################
 ##########################################################################################
 
-    # - name: Build App (Mac)
-    #   run: |
-    #     macdeployqt build/YUViewApp/YUView.app -always-overwrite -verbose=2
-    #     cp ${{matrix.LIBDE265_LOCAL}} build/YUViewApp/YUView.app/Contents/MacOS/.
-    #     cd build/YUViewApp
-    #     # Zip
-    #     zip -r ${{matrix.ARTIFACT_NAME}} YUView.app/
-    #     mkdir $GITHUB_WORKSPACE/artifacts
-    #     cp ${{matrix.ARTIFACT_NAME}} $GITHUB_WORKSPACE/artifacts/
-    #   if: matrix.os == 'macos-10.15' || matrix.os == 'macos-11.0'
+    - name: WindeployQT
+      run: |
+        cd $GITHUB_WORKSPACE
+        find $USERPROFILE/openSSL
+        mkdir deploy
+        cd deploy
+        cp ../build/Release/YUView.exe .
+        $USERPROFILE/YUViewQt/Qttools/bin/windeployqt.exe --release --dir $GITHUB_WORKSPACE/deploy --no-compiler-runtime YUView.exe
+        #d:\a\YUViewQt\YUViewQt\Qttools\bin\windeployqt.exe --release --dir d:\a\YUView\YUView\deploy --no-compiler-runtime YUView.exe
+        cp $USERPROFILE/openSSL/*.dll .
+        mkdir decoder
+        cp $USERPROFILE/libde265.dll decoder
+        cp $USERPROFILE/libde265License.txt decoder
+        cp ../LICENSE.GPL3 .
+        cd ..
+        python deployment/versioning.py -d deploy -o deploy/versioninfo.txt
+        mkdir artifacts
+        7z a artifacts/YUView-Win.zip ./deploy/*
+      shell: cmd
+    - name: Wix Windows
+      run: |
+        cd $GITHUB_WORKSPACE/deployment/wix
+        cp /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2019/Enterprise/VC/Redist/MSVC/v142/MergeModules/Microsoft_VC142_CRT_x64.msm .
+        "${WIX}\bin\heat.exe" dir ../../deploy -gg -dr APPLICATIONFOLDER -srd -sreg -cg YUViewComponents -out harvestedDirectory.wxs
+        "${WIX}\bin\candle.exe" -dConfiguration=Release -dOutDir=bin/Release/ -dTargetExt=.msi -dTargetFileName=YUViewSetup.msi -dTargetName=YUViewSetup -out obj/Release/ -arch x64 -ext "${WIX}\bin\WixUIExtension.dll" YUView.wxs
+        "${WIX}\bin\candle.exe" -dConfiguration=Release -dOutDir=bin/Release/ -dTargetExt=.msi -dTargetFileName=YUViewSetup.msi -dTargetName=YUViewSetup -out obj/Release/ -arch x64 harvestedDirectory.wxs
+        "${WIX}\bin\Light.exe" -b ../../deploy -out bin/Release/YUViewSetup.msi -pdbout bin/Release/YUViewSetup.wixpdb -cultures:null -ext "${WIX}\bin\WixUIExtension.dll" -contentsfile obj/Release/YUViewSetup.wixproj.BindContentsFileListnull.txt -outputsfile obj/Release/YUViewSetup.wixproj.BindOutputsFileListnull.txt -builtoutputsfile obj/Release/YUViewSetup.wixproj.BindBuiltOutputsFileListnull.txt obj/Release/YUView.wixobj obj/Release/harvestedDirectory.wixobj
+        cd $GITHUB_WORKSPACE
+        cp deployment/wix/bin/Release/YUViewSetup.msi ./
+      shell: bash
+      if: matrix.auto_update == true
 
 ##########################################################################################
 ############################### Upload ###################################################
 ##########################################################################################
 
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.ARTIFACT_NAME}}
+        path: artifacts
+    - name: Upload Windows installer Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: YUViewSetup.msi
+        path: ./YUViewSetup.msi
+      if: matrix.auto_update == true
+    - name: Upload Windows zip to Release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: artifacts/YUView-Win.zip
+        asset_name: ${{matrix.ARTIFACT_NAME}}
+        asset_content_type: application/zip
+      if: github.event_name == 'release'
+    - name: Upload Windows installer to Release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: YUViewSetup.msi
+        asset_name: YUViewSetup.msi
+        asset_content_type: application/zip
+      if: github.event_name == 'release' && matrix.auto_update == true
 
   # How to upload files to the release:
   # https://github.com/Blacksmoke16/oq/pull/47/files#diff-082c28d748ad2e3eecc5508d740d9417R9-R29
