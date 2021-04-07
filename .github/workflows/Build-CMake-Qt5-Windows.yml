@@ -86,7 +86,7 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
-        cmake  -DCMAKE_PREFIX_PATH="$USERPROFILE/YUViewQt/Qt" -DCMAKE_BUILD_TYPE=Release ..
+        cmake  -DCMAKE_PREFIX_PATH="$USERPROFILE/YUViewQt/Qt"  ..
         cmake --build . --parallel $(nproc) --verbose
       shell: bash
 
@@ -98,7 +98,7 @@ jobs:
       run: |
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/build
-        ctest --output-on-failure
+        ctest --output-on-failure --build-config Release
         # ctest --output-on-failure --debug --extra-verbose
       shell: bash
 
