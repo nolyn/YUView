@@ -32,12 +32,13 @@ jobs:
         echo $HOMEDRIVE
         echo $HOMEPATH
         echo $GITHUB_WORKSPACE
+        echo $USERPROFILE
         cd $HOMEDRIVE/$HOMEPATH
         curl -L https://github.com/ChristianFeldmann/jom/releases/download/v1.1.3-build/jom.exe -o jom.exe
       shell: bash
     - name: Install openSSL
       run: |
-        cd $HOMEPATH
+        cd $HOMEDRIVE/$HOMEPATH
         mkdir openSSL1
         cd openSSL
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/openSSL1.1.1g/openSSL_1_1_1g_win.zip -o openSSL.zip
@@ -51,7 +52,7 @@ jobs:
 
     - name: Install Qt base
       run: |
-        cd $HOMEPATH
+        cd $HOMEDRIVE/$HOMEPATH
         mkdir -p YUViewQt/
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
@@ -59,14 +60,14 @@ jobs:
       shell: bash
     - name: Install Qt deploy tools
       run: |
-        cd $HOMEPATH
+        cd $HOMEDRIVE/$HOMEPATH
         cd YUViewQt
         curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip -o deployQt.zip
         7z x deployQt.zip
       shell: bash
     - name: Install libde265
       run: |
-        cd $HOMEPATH
+        cd $HOMEDRIVE/$HOMEPATH
         curl -L https://github.com/ChristianFeldmann/libde265/releases/download/v1.1/libde265.dll -o libde265.dll
         curl -L https://raw.githubusercontent.com/ChristianFeldmann/libde265/master/COPYING -o libde265License.txt
       shell: bash
@@ -85,7 +86,7 @@ jobs:
         cd $GITHUB_WORKSPACE
         mkdir build
         cd build
-        cmake  -DCMAKE_PREFIX_PATH="$HOMEPATH/YUViewQt/Qt" ..
+        cmake  -DCMAKE_PREFIX_PATH="$HOMEDRIVE/$HOMEPATH/YUViewQt/Qt" ..
         cmake --build . --parallel $(nproc)
       shell: bash
 
