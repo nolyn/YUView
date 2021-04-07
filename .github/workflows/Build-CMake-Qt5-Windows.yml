@@ -15,17 +15,25 @@ jobs:
         include:
           - os: windows-2019
             qt_version: Qt5
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip
             auto_update: true
             ARTIFACT_NAME: YUView-Win.zip
           - os: windows-2019
             qt_version: Qt5
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip
             auto_update: false
             ARTIFACT_NAME: YUView-Win-noautoupdate.zip
           - os: windows-2019
             qt_version: Qt6
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_win.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip
             auto_update: true
           - os: windows-2019
             qt_version: Qt6
+            qt_base_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_win.zip
+            qt_tools_link: https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip
             auto_update: false
     steps:
     - uses: actions/checkout@v2
@@ -60,38 +68,19 @@ jobs:
 
     - name: Install Qt base
       shell: bash
-      if: matrix.qt_version == 'Qt5'
       run: |
         cd $HOME
         mkdir -p YUViewQt/
         cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
-        7z x  Qt.zip
-    - name: Install Qt base
-      shell: bash
-      if: matrix.qt_version == 'Qt6'
-      run: |
-        cd $HOME
-        mkdir -p YUViewQt/
-        cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-6.0.2/qtBase_6.0.2_win.zip -o Qt.zip
+        curl -L ${{matrix.qt_base_link}} -o Qt.zip
         7z x  Qt.zip
 
     - name: Install Qt deploy tools
       shell: bash
-      if: matrix.qt_version == 'Qt5'
       run: |
         cd $HOME
         cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-5.15.1/qtTools_5.15.1_win.zip -o deployQt.zip
-        7z x deployQt.zip
-    - name: Install Qt deploy tools
-      shell: bash
-      if: matrix.qt_version == 'Qt6'
-      run: |
-        cd $HOME
-        cd YUViewQt
-        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtDeployTools-6.0.2/qtTools_6.0.2_win.zip -o deployQt.zip
+        curl -L ${{matrix.qt_tools_link}} -o deployQt.zip
         7z x deployQt.zip
 
     - name: Install libde265
