@@ -98,8 +98,14 @@ jobs:
 ##########################################################################################
 ############################### Packaging YUView, Installers #############################
 ##########################################################################################
-
+        
     - name: Build Appimage (Linux)
+      # only run on oldest supported ubuntu:
+      # Please run on a system with a glibc version no newer than what comes with the oldest
+      # currently still-supported mainstream distribution.
+      # This is so that the resulting bundle will work on most still-supported Linux distributions.
+      if: matrix.os == 'ubuntu-16.04'
+      shell: bash    
       run: |
         cd $HOME
         curl -L https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -o linuxdeployqt-6-x86_64.AppImage
@@ -114,8 +120,6 @@ jobs:
         ls -l
         cd $GITHUB_WORKSPACE/artifacts
         ls -l
-      #if: matrix.os == 'ubuntu-16.04'
-      shell: bash
 
 ##########################################################################################
 ############################### Upload ###################################################
