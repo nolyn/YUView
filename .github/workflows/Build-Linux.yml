@@ -104,7 +104,7 @@ jobs:
       # Please run on a system with a glibc version no newer than what comes with the oldest
       # currently still-supported mainstream distribution.
       # This is so that the resulting bundle will work on most still-supported Linux distributions.
-      if: matrix.os == 'ubuntu-16.04'
+      if: matrix.os == 'ubuntu-16.04' &&  matrix.qt_version == 'Qt5'
       shell: bash    
       run: |
         cd $HOME
@@ -134,7 +134,7 @@ jobs:
         asset_path: artifacts/${{matrix.ARTIFACT_NAME}}
         asset_name: ${{matrix.ARTIFACT_NAME}}
         asset_content_type: application/zip
-      if: github.event_name == 'release' && matrix.os == 'ubuntu-16.04'
+      if: github.event_name == 'release' && matrix.os == 'ubuntu-16.04'  &&  matrix.qt_version == 'Qt5'
 
   # How to upload files to the release:
   # https://github.com/Blacksmoke16/oq/pull/47/files#diff-082c28d748ad2e3eecc5508d740d9417R9-R29
